@@ -51,7 +51,7 @@ pipeline {
                   }
                   else {
                     echo "Project does not exist. Creating..."
-                    sh(script: "curl -d 'branch=${env.BRANCH_NAME}&name=${env.PR_NAME}&project=${env.PR_NAME}:${env.BRANCH_NAME}' -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/projects/create")
+                    sh(script: "curl -d 'branch=${env.BRANCH_NAME}&name=${env.PR_NAME}&project=${env.PR_NAME}' -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/projects/create")
                     def PROJECT_WEBHOOK_KEY = sh(script: "curl -d 'name=Jenkins&project=${env.PR_NAME}:$BRANCH_NAME&url=${WEBHOOK_URL}' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/create | jq -r .webhook.key", returnStdout: true).trim()
                   }
                 }
