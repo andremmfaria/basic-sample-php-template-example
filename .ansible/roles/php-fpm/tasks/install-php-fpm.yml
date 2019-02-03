@@ -1,0 +1,15 @@
+---
+- name: Install for CentOS/RHEL
+  yum:
+    name: "{{ php_packages }}"
+    state: "{{ php_packages_state }}"
+  when:
+    - ansible_os_family == 'RedHat'
+
+
+- name: Install for Debian
+  apt:
+    name: "{{ php_packages }}"
+    state: "{{ php_packages_state }}"
+  when:
+    - ansible_os_family == 'Debian'
