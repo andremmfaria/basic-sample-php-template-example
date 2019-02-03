@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<?php include("includes/head-tag-contents.php");?>
+  <?php include("includes/head-tag-contents.php");?>
 </head>
 <body>
 
@@ -10,14 +10,14 @@
 <?php include("includes/navigation.php");?>
 
 <div class="container" id="main-content">
-	<h2>Welcome to my website!</h2>
-	<p>Some content goes here! Let's go with the classic "lorem ipsum."</p>
+	<h2>Hello UTILITY!</h2>
+  <p>Hallo UTILITY</p>
 
 	<p>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		This was a good challenge :D Thanks a lot.
 	</p>
 	<p>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		Skill honing makes perfection.
 	</p>
 </div>
 
