@@ -45,13 +45,13 @@ pipeline {
                 script{
                   WEBHOOK = registerWebhook()
                   def WEBHOOK_URL = "${WEBHOOK.getURL()}"
-                  def PROJECT = sh(script: "curl -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/projects/search?projects=${env.PR_NAME}:${env.BRANCH_NAME} | jq .components[0].key", returnStdout: true).trim()
+                  def PROJECT = sh(script: "curl -d 'projects=${env.PR_NAME}:${env.BRANCH_NAME}' -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/projects/search | jq .components[0].key", returnStdout: true).trim()
                   if(PROJECT == "${env.PR_NAME}:${env.BRANCH_NAME}") { 
                     def PROJECT_WEBHOOK_KEY = sh(script: "curl -d 'name=Jenkins&project=${env.PR_NAME}:$BRANCH_NAME&url=${WEBHOOK_URL}' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/create | jq -r .webhook.key", returnStdout: true).trim()
                   }
                   else {
                     echo "Project does not exist. Creating..."
-                    sh(script: "curl -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/projects/create?branch=${env.BRANCH_NAME}&name=${env.PR_NAME}&project=${env.PR_NAME}:${env.BRANCH_NAME}")
+                    sh(script: "curl -d 'branch=${env.BRANCH_NAME}&name=${env.PR_NAME}&project=${env.PR_NAME}:${env.BRANCH_NAME}' -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/projects/create")
                     def PROJECT_WEBHOOK_KEY = sh(script: "curl -d 'name=Jenkins&project=${env.PR_NAME}:$BRANCH_NAME&url=${WEBHOOK_URL}' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/create | jq -r .webhook.key", returnStdout: true).trim()
                   }
                 }
