@@ -54,18 +54,14 @@ pipeline {
                     sh(script: "curl -d 'branch=${env.BRANCH_NAME}&name=${env.PR_NAME}&project=${env.PR_NAME}' -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/projects/create")
                     PROJECT_WEBHOOK_KEY = sh(script: "curl -d 'name=Jenkins&project=${env.PR_NAME}:$BRANCH_NAME&url=${WEBHOOK_URL}' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/create | jq -r .webhook.key", returnStdout: true).trim()
                   }
-                }
-                sh """
-                  /opt/sonar-scanner/bin/sonar-scanner \
+                  sh("/opt/sonar-scanner/bin/sonar-scanner \
                     -Dsonar.sources=. \
                     -Dsonar.projectKey=${env.PR_NAME} \
                     -Dsonar.projectName=${env.PR_NAME} \
                     -Dsonar.projectVersion=${env.SHORT_COMMIT}-${env.RELEASE} \
                     -Dsonar.branch=${env.BRANCH_NAME} \
                     -Dsonar.host.url=$SONARQUBE_SERVER \
-                    -Dsonar.login=$SONARQUBE_LOGIN
-                """
-                script{ 
+                    -Dsonar.login=$SONARQUBE_LOGIN")
                   echo "Waiting for SonarQube to finish the scanning"
                   WEBHOOK_DATA = waitForWebhook WEBHOOK
                   def slurper = new JsonSlurper()
