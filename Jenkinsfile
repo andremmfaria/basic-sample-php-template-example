@@ -67,7 +67,7 @@ pipeline {
                   def slurper = new JsonSlurper()
                   def result = slurper.parseText(WEBHOOK_DATA)
                   echo "$WEBHOOK_DATA"
-                  sh(script: "curl -d 'webhook=$PROJECT_WEBHOOK_KEY' -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/delete")
+                  //sh(script: "curl -d 'webhook=$PROJECT_WEBHOOK_KEY' -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/delete")
                 }
             }
         }
