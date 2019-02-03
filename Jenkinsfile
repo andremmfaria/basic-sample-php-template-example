@@ -47,12 +47,12 @@ pipeline {
                   def WEBHOOK_URL = "${WEBHOOK.getURL()}"
                   def PROJECT = sh(script: "curl -d 'projects=${env.PR_NAME}:${env.BRANCH_NAME}' -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/projects/search | jq .components[0].key", returnStdout: true).trim()
                   if(PROJECT.replaceAll('\"','').equalsIgnoreCase("${env.PR_NAME}:${env.BRANCH_NAME}")) { 
-                    def PROJECT_WEBHOOK_KEY = sh(script: "curl -d 'name=Jenkins&project=${env.PR_NAME}:$BRANCH_NAME&url=${WEBHOOK_URL}' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/create | jq -r .webhook.key", returnStdout: true).trim()
+                    PROJECT_WEBHOOK_KEY = sh(script: "curl -d 'name=Jenkins&project=${env.PR_NAME}:$BRANCH_NAME&url=${WEBHOOK_URL}' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/create | jq -r .webhook.key", returnStdout: true).trim()
                   }
                   else {
                     echo "Project does not exist. Creating..."
                     sh(script: "curl -d 'branch=${env.BRANCH_NAME}&name=${env.PR_NAME}&project=${env.PR_NAME}' -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/projects/create")
-                    def PROJECT_WEBHOOK_KEY = sh(script: "curl -d 'name=Jenkins&project=${env.PR_NAME}:$BRANCH_NAME&url=${WEBHOOK_URL}' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/create | jq -r .webhook.key", returnStdout: true).trim()
+                    PROJECT_WEBHOOK_KEY = sh(script: "curl -d 'name=Jenkins&project=${env.PR_NAME}:$BRANCH_NAME&url=${WEBHOOK_URL}' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/create | jq -r .webhook.key", returnStdout: true).trim()
                   }
                   echo PROJECT_WEBHOOK_KEY
                 }
@@ -68,7 +68,7 @@ pipeline {
                 """
                 script{ 
                   echo "Waiting for SonarQube to finish the scanning"
-                  echo "$PROJECT_WEBHOOK_KEY"
+                  echo PROJECT_WEBHOOK_KEY
                   WEBHOOK_DATA = waitForWebhook WEBHOOK
                   def slurper = new JsonSlurper()
                   def result = slurper.parseText(WEBHOOK_DATA)
