@@ -59,7 +59,11 @@ pipeline {
                   def PROJECT_WEBHOOK_KEY = sh(script: "curl -d 'name=Jenkins&project=${env.JOB_NAME.split('/')[0]}:$BRANCH_NAME&url=${WEBHOOK_URL}' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/create | jq -r .webhook.key", returnStdout: true).trim()
                   echo "Waiting for SonarQube to finish the scanning"
                   WEBHOOK_DATA = waitForWebhook WEBHOOK
+                  echo "Passed0!"
                   def slurper = new JsonSlurper()
+                  echo "Passed1!"
+                  def result = slurper.parseText(WEBHOOK_DATA)
+                  echo "Passed2!"
                   def result = slurper.parseText(WEBHOOK_DATA)
                   sh("curl -d 'webhook=$PROJECT_WEBHOOK_KEY' -X POST http://$SONARQUBE_LOGIN@$SONARQUBE_SERVER/api/webhooks/delete")
                   if ( result.qualityGate.status != "OK") {
