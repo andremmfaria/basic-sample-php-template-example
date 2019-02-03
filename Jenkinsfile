@@ -70,9 +70,9 @@ pipeline {
                   WEBHOOK_DATA = waitForWebhook WEBHOOK
                   def slurper = new JsonSlurper()
                   def result = slurper.parseText(WEBHOOK_DATA)
-                  sh(script: "curl -d 'webhook=$PROJECT_WEBHOOK_KEY' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/delete", returnStdout: true).trim()
                   echo "$WEBHOOK_DATA"
                   echo "$result.qualityGate.status"
+                  sh(script: "curl -d 'webhook=$PROJECT_WEBHOOK_KEY' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/delete", returnStdout: true).trim()
                   if ( result.qualityGate.status != "OK") {
                     error("THE CODE WAS NOT APPROVED BY SONARQUBE, GO CHECK")
                   }
