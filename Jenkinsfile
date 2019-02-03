@@ -69,7 +69,7 @@ pipeline {
                     sh(script: "curl -d 'webhook=$PROJECT_WEBHOOK_KEY' -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/delete") 
                     def slurper = new JsonSlurper()
                     def result = slurper.parseText(WEBHOOK_DATA)
-                    if(retult.qualityGate.status =! "OK") {
+                    if(retult.qualityGate.status != "OK") {
                         error("Sonar tests failed, please go check")
                     }
                 }
