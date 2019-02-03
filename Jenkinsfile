@@ -29,34 +29,43 @@ pipeline {
                             env.RELEASE = ""
                             break
                     }
-					
-                    env.PACKAGE_NAME = "${env.JOB_NAME.split('/')[0]}-${SHORT_COMMIT}-${RELEASE}.tar.gz"
+					          env.PR_NAME = "${env.JOB_NAME.split('/')[0]}"
+                    env.PACKAGE_NAME = "${env.PR_NAME}-${SHORT_COMMIT}-${RELEASE}.tar.gz"
                 }
             }
         }
 
-        stage('inform slack') {
-          steps {
+        stage('inform slack') { steps {
             slackSend (color: '#FFFF00', message: ":rocket: STARTED: Job: `${env.JOB_NAME}` \n CONSOLE: ${env.BUILD_URL}console \n GIT URL: ${env.GIT_URL} \n Branch: `${env.BRANCH_NAME}`")
             }
         }
         
         stage('Sonar Test') {
             steps {
+                script{
+                  WEBHOOK = registerWebhook()
+                  def WEBHOOK_URL = "${WEBHOOK.getURL()}"
+                  def PROJECT = sh(script: "curl -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/projects/search?projects=${env.PR_NAME}:${env.BRANCH_NAME} | jq .components[0].key", returnStdout: true).trim()
+                  if(PROJECT == "${env.PR_NAME}:${env.BRANCH_NAME}") { 
+                    def PROJECT_WEBHOOK_KEY = sh(script: "curl -d 'name=Jenkins&project=${env.PR_NAME}:$BRANCH_NAME&url=${WEBHOOK_URL}' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/create | jq -r .webhook.key", returnStdout: true).trim()
+                  }
+                  else {
+                    echo "Project does not exist. Creating..."
+                    sh(script: "curl -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/projects/create?branch=${env.BRANCH_NAME}&name=${env.PR_NAME}&project=${env.PR_NAME}:${env.BRANCH_NAME}")
+                    def PROJECT_WEBHOOK_KEY = sh(script: "curl -d 'name=Jenkins&project=${env.PR_NAME}:$BRANCH_NAME&url=${WEBHOOK_URL}' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/create | jq -r .webhook.key", returnStdout: true).trim()
+                  }
+                }
                 sh """
                   /opt/sonar-scanner/bin/sonar-scanner \
                     -Dsonar.sources=. \
-                    -Dsonar.projectKey=${env.JOB_NAME.split('/')[0]} \
-                    -Dsonar.projectName=${env.JOB_NAME.split('/')[0]} \
+                    -Dsonar.projectKey=${env.PR_NAME} \
+                    -Dsonar.projectName=${env.PR_NAME} \
                     -Dsonar.projectVersion=${env.SHORT_COMMIT}-${env.RELEASE} \
                     -Dsonar.branch=${env.BRANCH_NAME} \
                     -Dsonar.host.url=$SONARQUBE_SERVER \
                     -Dsonar.login=$SONARQUBE_LOGIN
                 """
                 script{ 
-                  WEBHOOK = registerWebhook()
-                  def WEBHOOK_URL = "${WEBHOOK.getURL()}"
-                  def PROJECT_WEBHOOK_KEY = sh(script: "curl -d 'name=Jenkins&project=${env.JOB_NAME.split('/')[0]}:$BRANCH_NAME&url=${WEBHOOK_URL}' -X POST -u ${env.SONAR_CRED} $SONARQUBE_SERVER/api/webhooks/create | jq -r .webhook.key", returnStdout: true).trim()
                   echo "Waiting for SonarQube to finish the scanning"
                   WEBHOOK_DATA = waitForWebhook WEBHOOK
                   def slurper = new JsonSlurper()
