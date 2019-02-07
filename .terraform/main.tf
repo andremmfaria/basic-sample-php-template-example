@@ -1,5 +1,7 @@
 provider "aws" {
   region = "us-east-1"
+  access_key = "AKIAITZMGRBLNYXWW3GA"
+  secret_key = "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"
 }
 
 /*
@@ -93,7 +95,7 @@ resource "aws_route53_record" "jenkins_dns" {
 
 resource "aws_instance" "nexus" {
   ami           = "ami-060c0f2bf286ccd33"
-  instance_type = "t2.micro"
+  instance_type = "t2.small"
   vpc_security_group_ids = ["${aws_security_group.allow_ports.id}"]
 
   tags = {

@@ -87,6 +87,18 @@ pipeline {
                 """
             }
         }
+
+        stage('Deploy') {
+          when { anyOf {environment name: RELEASE, value: 'dv' ; environment name: RELEASE, value: 'ft' } }
+          options{ timeout(time: 30, unit: 'SECONDS') }
+          input {
+            message "Deploy?"
+            ok "YES!"
+          }
+          steps{
+            echo "Deploying..."
+          }
+        }
         
         /*stage('Deploy') {
             when { anyOf { branch 'master' } }
