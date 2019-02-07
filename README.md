@@ -1,2 +1,2 @@
-# Hallo-utility
-Repository for UTILITY code challenge
+# Hallo-itility
+Repository for ITILITY code challenge
