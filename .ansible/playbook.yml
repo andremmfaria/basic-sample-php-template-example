@@ -1,12 +1,9 @@
 ---
 - name: Provision "{{application}}"
   hosts: all
-  remote_user: "{{service_user}}"
   become: yes
 
   roles:
-    - terraform-ec2
-    - terraform-r53
     - common
     - nginx
     - php-fpm

@@ -29,6 +29,7 @@ pipeline {
                             env.RELEASE = ""
                             break
                     }
+                    env.APPLICATION_SERVER_ADDRESS = 'application.kantaros.net'
 					          env.PR_NAME = "${env.JOB_NAME.split('/')[0]}"
                     env.PACKAGE_NAME = "${env.PR_NAME}-${SHORT_COMMIT}-${RELEASE}.tar.gz"
                 }
@@ -88,35 +89,46 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-          when { anyOf {environment name: RELEASE, value: 'dv' ; environment name: RELEASE, value: 'ft' } }
-          options{ timeout(time: 30, unit: 'SECONDS') }
-          input {
-            message "Deploy?"
-            ok "YES!"
-          }
-          steps{
-            echo "Deploying..."
-          }
+        stage('Deploy approval') {
+            options {timeout(time: 60, unit: 'SECONDS')}
+            input {
+              message "Deploy?"
+              ok "Roger roger!"
+            }
         }
         
-        /*stage('Deploy') {
-            when { anyOf { branch 'master' } }
+        stage('Deploy') {
             steps {
-                sshagent (credentials: ['jenkins-mercury-server']) {
-                    sh """
-                        ssh \
-                          -o StrictHostKeyChecking=no \
-                          -l root 10.105.103.34 \
-                          -p 2222 \
-                          git \
-                          --work-tree=/var/www/multiplik \
-                          --git-dir=/var/www/multiplik/.git \
-                          pull origin master
-                    """
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_CREDENTIALS', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],sshUserPrivateKey(credentialsID: 'UBUNTU_JENKINS_PRIVATE_KEY',keyFileVariable: 'SSH_KEYPATH', usernameVariable: 'SSH_USER')]) { 
+                      sh """
+                          export TF_VAR_AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+                          export TF_VAR_AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+                          export TV_VAR_SERVER_DNS=${env.APPLICATION_SERVER_ADDRESS}
+                          
+                          cd ${WORKSPACE}/.terraform
+                          terraform init
+                          terraform apply -auto-approve
+
+                          cd ${WORKSPACE}/.ansible
+                          echo ${env.APPLICATION_SERVER_ADDRESS} > hosts
+                          ansible-playbook playbook.yml -i hosts -u SSH_USER -b --key-file $SSH_KEYPATH -e server_name=${env.APPLICATION_SERVER_ADDRESS} -e package_download_adress=${env.NEXUS_ADDRESS}/${env.JOB_NAME}/${env.PACKAGE_NAME} -e nexus_cred=${env.NEXUS_CRED} 
+                      """
+                    }
                 }
             }
-        }*/
+        }
+
+        stage('Destroy environment')
+        input{
+          message "Destroy created environment?"
+          ok 'Yes!'
+        }
+        steps{
+          sh """
+              cd ${WORKSPACE}/.terraform
+              terraform destroy -auto-approve
+          """
+        }
     }
     post {
        success {
