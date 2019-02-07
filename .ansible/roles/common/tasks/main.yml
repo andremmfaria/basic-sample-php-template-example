@@ -1,0 +1,25 @@
+---
+
+- name: Update system and install essential packages
+  apt:
+    name: "{{packages}}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - curl
+      - wget
+      - software-properties-common
+  when:
+    - ansible_os_family == 'Debian'
+
+- name: Update system and install essential packages
+  yum:
+    name: "{{packages}}"
+    state: present
+  vars:
+    packages:
+      - curl
+      - wget
+  when:
+    - ansible_os_family == 'RedHat'

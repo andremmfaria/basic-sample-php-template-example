@@ -1,0 +1,16 @@
+---
+- name: Ensure deploy location
+  file:
+    path: "/var/www/{{server_name}}"
+    state: directory
+
+- name: Deployment
+  shell: |
+    curl --insecure -u "{{nexus_cred}}" -o /tmp/package.tar.gz -L "{{package_download_address}}"
+    tar -xzvf /tmp/package.tar.gz -C "/var/www/{{server_name}}"
+    rm -rf /tmp/package.tar.gz
+
+- name: restart nginx
+  service: 
+    name: nginx
+    state: restarted

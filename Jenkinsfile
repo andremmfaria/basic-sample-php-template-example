@@ -41,7 +41,7 @@ pipeline {
             }
         }
         
-        /*stage('Sonar Test') {
+        stage('Sonar Test') {
             steps {
                 script{
                     WEBHOOK = registerWebhook()
@@ -87,7 +87,7 @@ pipeline {
                       ${env.NEXUS_ADDRESS}/${env.JOB_NAME}/${env.PACKAGE_NAME}
                 """
             }
-        }*/
+        }
 
         stage('Deploy approval') {
             options {timeout(time: 60, unit: 'SECONDS')}
@@ -111,7 +111,7 @@ pipeline {
 
                           cd ${WORKSPACE}/.ansible
                           echo ${env.APPLICATION_SERVER_ADDRESS} > hosts
-                          ansible-playbook playbook.yml -i hosts -u SSH_USER -b --key-file $SSH_KEYPATH
+                          ansible-playbook playbook.yml -i hosts -u SSH_USER -b --key-file $SSH_KEYPATH -e server_name=${env.APPLICATION_SERVER_ADDRESS} -e package_download_adress=${env.NEXUS_ADDRESS}/${env.JOB_NAME}/${env.PACKAGE_NAME} -e nexus_cred=${env.NEXUS_CRED} 
                       """
                     }
                 }
