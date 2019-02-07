@@ -1,2 +1,3 @@
 .terraform/.terraform
+dev_env_terraform/.terraform
 terraform.*

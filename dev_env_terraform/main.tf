@@ -1,7 +1,7 @@
 provider "aws" {
   region = "us-east-1"
-  access_key = "AKIAITZMGRBLNYXWW3GA"
-  secret_key = "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"
+  access_key = ""
+  secret_key = ""
 }
 
 data "aws_route53_zone" "primary" {
@@ -44,7 +44,7 @@ resource "aws_security_group" "allow_ports" {
 }
 
 resource "aws_instance" "jenkins" {
-  ami           = "ami-09027a8175c03b7fe"
+  ami           = "ami-061c41b400eeccd71"
   instance_type = "t2.medium"
   vpc_security_group_ids = ["${aws_security_group.allow_ports.id}"]
 
@@ -67,7 +67,7 @@ resource "aws_route53_record" "jenkins_dns" {
 }
 
 resource "aws_instance" "nexus" {
-  ami           = "ami-060c0f2bf286ccd33"
+  ami           = "ami-075230ee37a27c71a"
   instance_type = "t2.small"
   vpc_security_group_ids = ["${aws_security_group.allow_ports.id}"]
 
@@ -90,7 +90,7 @@ resource "aws_route53_record" "nexus_dns" {
 }
 
 resource "aws_instance" "sonar" {
-  ami           = "ami-049cfb03fef34ec2d"
+  ami           = "ami-0fb88ee218fdce4ca"
   instance_type = "t2.small"
   vpc_security_group_ids = ["${aws_security_group.allow_ports.id}"]
 
